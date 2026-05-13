@@ -17,7 +17,8 @@ The large dependency folders in this repository are used as local path dependenc
 
 ```powershell
 $env:DATABASE_URL="postgres://postgres:postgres@localhost/min"
-cargo run -p min-server
+cd min-server
+cargo run
 ```
 
 ## Client

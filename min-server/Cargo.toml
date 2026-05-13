@@ -1,20 +1,21 @@
 [package]
 name = "min-server"
 version = "0.1.0"
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
+edition = "2021"
+rust-version = "1.86"
+authors = ["min contributors"]
+license = "MIT"
 
 [dependencies]
-anyhow.workspace = true
-axum.workspace = true
-base64.workspace = true
-chrono.workspace = true
-futures-util.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-sqlx.workspace = true
-tokio.workspace = true
-tracing.workspace = true
-tracing-subscriber.workspace = true
-uuid.workspace = true
+anyhow = "1"
+axum = { path = "../axum/axum", features = ["ws", "json"] }
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+futures-util = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sqlx = { path = "../sqlx", default-features = false, features = ["runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "chrono", "json"] }
+tokio = { path = "../tokio/tokio", features = ["macros", "rt-multi-thread", "sync", "net", "time"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v4", "serde"] }

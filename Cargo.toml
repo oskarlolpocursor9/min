@@ -1,8 +1,9 @@
 [workspace]
-members = ["min-client/src-tauri", "min-server"]
+members = ["min-client/src-tauri"]
 exclude = [
   "AEADs",
   "axum",
+  "min-server",
   "rusqlite",
   "signatures",
   "snow",
