@@ -110,6 +110,7 @@ async fn register(
         SET display_name = EXCLUDED.display_name,
             public_key = EXCLUDED.public_key
         RETURNING id, display_name, public_key, created_at
+        "#,
     )
     .bind(req.id)
     .bind(req.display_name)
@@ -211,6 +212,7 @@ async fn handle_event(state: &AppState, sender_id: &str, event: ClientEvent) {
                 INSERT INTO queued_messages (id, sender_id, recipient_id, envelope)
                 VALUES ($1, $2, $3, $4)
                 ON CONFLICT (id) DO NOTHING
+                "#,
             )
             .bind(envelope.id)
             .bind(sender_id)

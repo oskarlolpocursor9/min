@@ -1,12 +1,27 @@
 [workspace]
 members = ["min-client/src-tauri", "min-server"]
+exclude = [
+  "AEADs",
+  "axum",
+  "rusqlite",
+  "signatures",
+  "snow",
+  "sqlx",
+  "tauri",
+  "tokio",
+  "tokio-tungstenite",
+  "tonic",
+]
 resolver = "2"
 
 [workspace.package]
 edition = "2021"
+rust-version = "1.86"
 authors = ["min contributors"]
+homepage = "https://github.com/oskarlolpocursor9/min"
 license = "MIT"
-repository = "https://github.com/OWNER/min"
+repository = "https://github.com/oskarlolpocursor9/min"
+categories = ["gui", "network-programming", "cryptography"]
 
 [workspace.dependencies]
 anyhow = "1"
