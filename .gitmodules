@@ -1,0 +1,30 @@
+[submodule "AEADs"]
+	path = AEADs
+	url = https://github.com/RustCrypto/AEADs.git
+[submodule "axum"]
+	path = axum
+	url = https://github.com/tokio-rs/axum.git
+[submodule "rusqlite"]
+	path = rusqlite
+	url = https://github.com/rusqlite/rusqlite.git
+[submodule "snow"]
+	path = snow
+	url = https://github.com/mcginty/snow.git
+[submodule "sqlx"]
+	path = sqlx
+	url = https://github.com/launchbadge/sqlx.git
+[submodule "tauri"]
+	path = tauri
+	url = https://github.com/tauri-apps/tauri.git
+[submodule "tokio"]
+	path = tokio
+	url = https://github.com/tokio-rs/tokio.git
+[submodule "tokio-tungstenite"]
+	path = tokio-tungstenite
+	url = https://github.com/snapview/tokio-tungstenite.git
+[submodule "signatures"]
+	path = signatures
+	url = https://github.com/RustCrypto/signatures.git
+[submodule "tonic"]
+	path = tonic
+	url = https://github.com/hyperium/tonic.git

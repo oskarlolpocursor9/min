@@ -1,0 +1,8 @@
+/target
+/min-client/node_modules
+/min-client/dist
+/min-client/src-tauri/target
+/.env
+/.vscode
+*.db
+*.sqlite

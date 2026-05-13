@@ -1,0 +1,39 @@
+[package]
+name = "min-client"
+version = "0.1.0"
+description = "Secure min desktop messenger"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+name = "min_client"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "min-client"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[dependencies]
+aes-gcm.workspace = true
+anyhow.workspace = true
+base64.workspace = true
+chrono.workspace = true
+dirs.workspace = true
+ed25519-dalek.workspace = true
+futures-util.workspace = true
+rand_core.workspace = true
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+snow.workspace = true
+tauri.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-tungstenite.workspace = true
+uuid.workspace = true
