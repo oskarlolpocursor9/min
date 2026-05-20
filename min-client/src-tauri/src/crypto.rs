@@ -1,7 +1,8 @@
 use aes_gcm::{
-    aead::{Aead, AeadCore, KeyInit, OsRng},
+    aead::{Aead, AeadCore, KeyInit},
     Aes256Gcm,
 };
+use rand_core::OsRng;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::{DateTime, Utc};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
