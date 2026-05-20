@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
+use tauri::Emitter;
 use tokio::sync::mpsc;
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 use uuid::Uuid;
@@ -72,6 +73,7 @@ pub async fn connect(
     server_ws_url: &str,
     user_id: &str,
     store: Arc<Mutex<LocalStore>>,
+    app: tauri::AppHandle,
 ) -> anyhow::Result<WsHandle> {
     let _noise = crypto::build_noise_initiator()?;
     let url = format!("{}/{}", server_ws_url.trim_end_matches('/'), user_id);
@@ -118,6 +120,8 @@ pub async fn connect(
                     &body,
                     envelope.created_at,
                 );
+
+                let _ = app.emit("new-message", ());
             }
         }
     });

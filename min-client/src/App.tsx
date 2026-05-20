@@ -1,5 +1,6 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import {
   KeyRound,
   Lock,
@@ -34,6 +35,8 @@ export default function App() {
   const [messages, setMessages] = useState<StoredMessage[]>([]);
   const [status, setStatus] = useState("offline");
 
+  const timelineRef = useRef<HTMLDivElement>(null);
+
   const activeMessages = useMemo(
     () => messages.filter((item) => !recipientId || item.peer_id === recipientId),
     [messages, recipientId],
@@ -43,13 +46,28 @@ export default function App() {
     void refreshMessages();
   }, []);
 
+  useEffect(() => {
+    const unlistenPromise = listen("new-message", () => {
+      void refreshMessages();
+    });
+    return () => {
+      void unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (timelineRef.current) {
+      timelineRef.current.scrollTop = timelineRef.current.scrollHeight;
+    }
+  }, [activeMessages]);
+
   async function refreshMessages() {
     const rows = await invoke<StoredMessage[]>("list_messages");
     setMessages(rows);
   }
 
   async function createIdentity() {
-    const next = await invoke<Identity>("create_identity", { displayName });
+    const next = await invoke<Identity>("create_identity", { display_name: displayName });
     setIdentity(next);
     setStatus("identity ready");
   }
@@ -57,10 +75,10 @@ export default function App() {
   async function connect() {
     if (!identity) return;
     await invoke("connect_server", {
-      serverUrl,
-      userId: identity.id,
-      displayName: identity.display_name,
-      publicKey: identity.public_key,
+      server_url: serverUrl,
+      user_id: identity.id,
+      display_name: identity.display_name,
+      public_key: identity.public_key,
     });
     setStatus("connected");
   }
@@ -69,7 +87,7 @@ export default function App() {
     event.preventDefault();
     if (!recipientId.trim() || !message.trim()) return;
     await invoke("send_message", {
-      recipientId: recipientId.trim(),
+      recipient_id: recipientId.trim(),
       body: message.trim(),
     });
     setMessage("");
@@ -141,7 +159,7 @@ export default function App() {
           </div>
         </header>
 
-        <div className="timeline">
+        <div className="timeline" ref={timelineRef}>
           {activeMessages.map((item) => (
             <article className={`bubble ${item.direction}`} key={item.id}>
               <p>{item.body}</p>

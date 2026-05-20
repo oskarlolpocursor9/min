@@ -87,8 +87,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/health", get(|| async { "ok" }))
         .route("/register", post(register))
         .route("/login", post(login))
-        .route("/users/{id}/key", get(user_key))
-        .route("/ws/{user_id}", get(ws_handler))
+        .route("/users/:id/key", get(user_key))
+        .route("/ws/:user_id", get(ws_handler))
         .with_state(state);
 
     let addr: SocketAddr = "0.0.0.0:3027".parse()?;
@@ -155,8 +155,41 @@ async fn handle_socket(state: AppState, user_id: String, socket: WebSocket) {
     let (mut sender, mut receiver) = socket.split();
     let (tx, mut rx) = mpsc::unbounded_channel::<ServerEvent>();
 
-    state.clients.write().await.insert(user_id.clone(), tx);
+    state.clients.write().await.insert(user_id.clone(), tx.clone());
     info!(%user_id, "client connected");
+
+    // Deliver queued messages
+    let queued = sqlx::query(
+        "SELECT id, sender_id, envelope FROM queued_messages WHERE recipient_id = $1 AND delivered_at IS NULL ORDER BY created_at ASC"
+    )
+    .bind(&user_id)
+    .fetch_all(&state.db)
+    .await;
+
+    match queued {
+        Ok(rows) => {
+            for row in rows {
+                use sqlx::Row;
+                let id: Uuid = row.get("id");
+                let sender_id: String = row.get("sender_id");
+                let envelope_json: serde_json::Value = row.get("envelope");
+
+                if let Ok(envelope) = serde_json::from_value::<EncryptedEnvelope>(envelope_json) {
+                    let delivery_event = ServerEvent::Delivery {
+                        from: sender_id,
+                        envelope,
+                    };
+                    if tx.send(delivery_event).is_ok() {
+                        let _ = sqlx::query("UPDATE queued_messages SET delivered_at = now() WHERE id = $1")
+                            .bind(id)
+                            .execute(&state.db)
+                            .await;
+                    }
+                }
+            }
+        }
+        Err(err) => error!(?err, %user_id, "failed to fetch queued messages"),
+    }
 
     let writer = tokio::spawn(async move {
         while let Some(event) = rx.recv().await {

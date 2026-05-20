@@ -28,6 +28,7 @@ fn create_identity(state: tauri::State<AppState>, display_name: String) -> Resul
 #[tauri::command]
 async fn connect_server(
     state: tauri::State<'_, AppState>,
+    app_handle: tauri::AppHandle,
     server_url: String,
     user_id: String,
     display_name: String,
@@ -37,7 +38,7 @@ async fn connect_server(
         .await
         .map_err(|err| err.to_string())?;
 
-    let handle = network::connect(&server_url, &user_id, state.store.clone())
+    let handle = network::connect(&server_url, &user_id, state.store.clone(), app_handle)
         .await
         .map_err(|err| err.to_string())?;
 
