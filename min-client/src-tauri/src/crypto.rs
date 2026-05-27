@@ -1,8 +1,7 @@
 use aes_gcm::{
-    aead::{Aead, AeadCore, KeyInit},
-    Aes256Gcm,
+    aead::{Aead, KeyInit, Generate, Key},
+    Aes256Gcm, Nonce,
 };
-use rand_core::OsRng;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::{DateTime, Utc};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
@@ -64,7 +63,7 @@ pub fn encrypt_message(
 ) -> anyhow::Result<EncryptedEnvelope> {
     let key = decode_array::<32>(conversation_key_b64)?;
     let cipher = Aes256Gcm::new((&key).into());
-    let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+    let nonce = Nonce::generate();
     let ciphertext = cipher.encrypt(&nonce, body.as_bytes())?;
 
     Ok(EncryptedEnvelope {
@@ -87,7 +86,7 @@ pub fn decrypt_message(envelope: &EncryptedEnvelope, conversation_key_b64: &str)
 }
 
 pub fn new_conversation_key() -> String {
-    let key = Aes256Gcm::generate_key(&mut OsRng);
+    let key = Key::<Aes256Gcm>::generate();
     STANDARD.encode(key)
 }
 
