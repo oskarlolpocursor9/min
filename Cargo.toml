@@ -41,7 +41,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 
 # Local library checkouts supplied with this project.
-aes-gcm = { path = "AEADs/aes-gcm" }
+aes-gcm = { path = "AEADs/aes-gcm", features = ["rand_core"] }
 axum = { path = "axum/axum", features = ["ws", "json"] }
 rusqlite = { path = "rusqlite", features = ["bundled"] }
 snow = { path = "snow" }
