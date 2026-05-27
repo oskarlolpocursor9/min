@@ -9,6 +9,7 @@ import {
   Send,
   ShieldCheck,
   UserRound,
+  Users,
 } from "lucide-react";
 
 type StoredMessage = {
@@ -25,15 +26,15 @@ type Identity = {
   public_key: string;
 };
 
-const serverUrl = "ws://127.0.0.1:3027/ws";
-
 export default function App() {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [displayName, setDisplayName] = useState("min user");
+  const [serverUrl, setServerUrl] = useState("ws://127.0.0.1:3027/ws");
   const [recipientId, setRecipientId] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<StoredMessage[]>([]);
   const [status, setStatus] = useState("offline");
+  const [onlineUsers, setOnlineUsers] = useState<Identity[]>([]);
 
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +61,29 @@ export default function App() {
       timelineRef.current.scrollTop = timelineRef.current.scrollHeight;
     }
   }, [activeMessages]);
+
+  // Poll online users every 3 seconds when connected
+  useEffect(() => {
+    if (status !== "connected") return;
+
+    const poll = async () => {
+      try {
+        const users = await invoke<Identity[]>("get_online_users", {
+          server_url: serverUrl,
+        });
+        // Filter out ourselves from the list
+        setOnlineUsers(
+          identity ? users.filter((u) => u.id !== identity.id) : users,
+        );
+      } catch {
+        // silently ignore polling errors
+      }
+    };
+
+    void poll();
+    const interval = setInterval(poll, 3000);
+    return () => clearInterval(interval);
+  }, [status, serverUrl, identity]);
 
   async function refreshMessages() {
     const rows = await invoke<StoredMessage[]>("list_messages");
@@ -92,6 +116,10 @@ export default function App() {
     });
     setMessage("");
     await refreshMessages();
+  }
+
+  function selectUser(userId: string) {
+    setRecipientId(userId);
   }
 
   return (
@@ -132,12 +160,45 @@ export default function App() {
             <PlugZap size={17} />
             <span>Server</span>
           </div>
-          <code className="endpoint">{serverUrl}</code>
+          <input
+            value={serverUrl}
+            onChange={(event) => setServerUrl(event.target.value)}
+            placeholder="ws://host:port/ws"
+          />
           <button disabled={!identity} onClick={connect}>
             <ShieldCheck size={16} />
             Connect
           </button>
         </section>
+
+        {status === "connected" && (
+          <section className="panel online-panel">
+            <div className="panel-title">
+              <Users size={17} />
+              <span>Online</span>
+              <span className="online-count">{onlineUsers.length}</span>
+            </div>
+            {onlineUsers.length === 0 ? (
+              <p className="no-users">No other users online</p>
+            ) : (
+              <ul className="user-list">
+                {onlineUsers.map((user) => (
+                  <li
+                    key={user.id}
+                    className={`user-item${recipientId === user.id ? " active" : ""}`}
+                    onClick={() => selectUser(user.id)}
+                  >
+                    <span className="online-dot" />
+                    <div className="user-info">
+                      <span className="user-name">{user.display_name}</span>
+                      <span className="user-id">{user.id}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
       </aside>
 
       <section className="conversation">

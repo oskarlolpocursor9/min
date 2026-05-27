@@ -88,6 +88,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/register", post(register))
         .route("/login", post(login))
         .route("/users/:id/key", get(user_key))
+        .route("/users/online", get(online_users))
         .route("/ws/:user_id", get(ws_handler))
         .with_state(state);
 
@@ -141,6 +142,24 @@ async fn user_key(
     .ok_or(ApiError::NotFound)?;
 
     Ok(Json(user))
+}
+
+async fn online_users(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<UserRecord>>, ApiError> {
+    let online_ids: Vec<String> = state.clients.read().await.keys().cloned().collect();
+    if online_ids.is_empty() {
+        return Ok(Json(vec![]));
+    }
+
+    let users = sqlx::query_as::<_, UserRecord>(
+        "SELECT id, display_name, public_key, created_at FROM users WHERE id = ANY($1)",
+    )
+    .bind(&online_ids)
+    .fetch_all(&state.db)
+    .await?;
+
+    Ok(Json(users))
 }
 
 async fn ws_handler(

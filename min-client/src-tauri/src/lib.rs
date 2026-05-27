@@ -96,6 +96,25 @@ fn list_messages(state: tauri::State<AppState>) -> Result<Vec<StoredMessage>, St
         .map_err(|err| err.to_string())
 }
 
+#[tauri::command]
+async fn get_online_users(server_url: String) -> Result<Vec<crypto::Identity>, String> {
+    let users = network::fetch_online_users(&server_url)
+        .await
+        .map_err(|err| err.to_string())?;
+
+    let result = users
+        .into_iter()
+        .map(|u| crypto::Identity {
+            id: u.id,
+            display_name: u.display_name,
+            public_key: u.public_key,
+            secret_key: "".to_string(),
+        })
+        .collect();
+
+    Ok(result)
+}
+
 pub fn run() {
     let store = LocalStore::open().expect("failed to open local min database");
 
@@ -108,7 +127,8 @@ pub fn run() {
             create_identity,
             connect_server,
             send_message,
-            list_messages
+            list_messages,
+            get_online_users
         ])
         .run(tauri::generate_context!())
         .expect("error while running min");

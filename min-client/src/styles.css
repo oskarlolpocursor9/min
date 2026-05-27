@@ -227,6 +227,111 @@ code {
   background: rgba(15, 16, 17, 0.78);
 }
 
+/* ── Online users panel ── */
+
+.online-panel {
+  overflow: hidden;
+}
+
+.online-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: rgba(94, 106, 210, 0.25);
+  color: #a3adff;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.no-users {
+  margin: 0;
+  color: #62666d;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.user-item:hover {
+  background: rgba(94, 106, 210, 0.08);
+  border-color: rgba(94, 106, 210, 0.2);
+}
+
+.user-item.active {
+  background: rgba(94, 106, 210, 0.14);
+  border-color: rgba(94, 106, 210, 0.4);
+}
+
+.online-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 4px rgba(52, 211, 153, 0.4); }
+  50%      { box-shadow: 0 0 10px rgba(52, 211, 153, 0.8); }
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e2e6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-id {
+  font-size: 11px;
+  color: #62666d;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar {
+  overflow-y: auto;
+}
+
 @media (max-width: 760px) {
   body {
     overflow: auto;

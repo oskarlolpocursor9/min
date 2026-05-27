@@ -57,6 +57,7 @@ pub async fn register(server_ws_url: &str, id: &str, display_name: &str, public_
 
     reqwest::Client::new()
         .post(format!("{http_base}/register"))
+        .header("bypass-tunnel-reminder", "true")
         .json(&RegisterRequest {
             id: id.to_string(),
             display_name: display_name.to_string(),
@@ -127,4 +128,30 @@ pub async fn connect(
     });
 
     Ok(WsHandle { tx })
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OnlineUser {
+    pub id: String,
+    pub display_name: String,
+    pub public_key: String,
+}
+
+pub async fn fetch_online_users(server_ws_url: &str) -> anyhow::Result<Vec<OnlineUser>> {
+    let base = server_ws_url
+        .trim_end_matches('/')
+        .replace("ws://", "http://")
+        .replace("wss://", "https://");
+    let http_base = base.strip_suffix("/ws").unwrap_or(&base);
+
+    let res = reqwest::Client::new()
+        .get(format!("{http_base}/users/online"))
+        .header("bypass-tunnel-reminder", "true")
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<Vec<OnlineUser>>()
+        .await?;
+
+    Ok(res)
 }
